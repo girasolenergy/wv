@@ -19,7 +19,6 @@ uint8_t pixmap[4][2] = {
     {0x04, 0x20},
     {0x40, 0x80}
 };
-
 typedef struct {
 	cchar_t*	buff;
 	int 		width;
@@ -52,6 +51,24 @@ void canvas_clear(canvas_t canvas) {
 	}
 }
 
+typedef struct {
+    int  buff_size;
+    char *buff;
+    int  group_size;
+    char *max;
+    char *min;
+} track_t;
+    
+track_t track_init(char *buff, int size) {
+    track_t track;
+    track.buff_size = size;
+    track.buff = buff;
+    track.group_size = 1024;
+    int len = size / track.group_size;
+    track.min = (char*)callc(len, sizeof(char));
+    track.max = (char*)callc(len, sizeof(char));
+    
+}
 
 int main(int argc, char **argv) {
     setbuf(stdout, NULL);
@@ -90,7 +107,6 @@ int main(int argc, char **argv) {
 		}
 		canvas_draw(canvas, win);
     	wrefresh(win);
-        //sleep(1);
 	}
 
     sleep(999);

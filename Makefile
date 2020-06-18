@@ -4,7 +4,7 @@ LDLIBS=-lm -lncursesw
 
 wv: main.c
 	$(CC) -o wv main.c -I. $(LDLIBS)
-	./wv
+	#./wv d.raw
 
 clean:
 	rm wv
