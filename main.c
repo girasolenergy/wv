@@ -143,8 +143,8 @@ int main(int argc, char **argv) {
     
     track_t track = track_init(buff, len);
 
-    int win_width = 80;
-    int win_height = 65;
+    int win_width = COLS;
+    int win_height = LINES;
     int can_width = win_width * 2;
     int can_height = win_height * 4;
     WINDOW *win = newwin(win_height, win_width, 0, 0);
@@ -171,10 +171,14 @@ int main(int argc, char **argv) {
                 break;
             char min, max;
             track_get_minmax(track, st, ed, &min, &max);
-            min = (min - 128) * vscale + 128;
-            max = (max - 128) * vscale + 128;
-            for (int y = min; y < max; y++)
-                canvas_set(canvas, i, 255-y);
+            min = (min - 128) * vscale + can_height / 2;
+            max = (max - 128) * vscale + can_height / 2;
+            for (int y = min; y < max; y++) {
+                int _y = can_height - y;
+                _y = MIN(_y, can_height);
+                _y = MAX(_y, 0);
+                canvas_set(canvas, i, _y);
+            }
 		}
 
 		canvas_draw(canvas, win);
