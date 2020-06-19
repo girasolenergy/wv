@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
     keypad(stdscr, TRUE);
 
 	//FILE *fd = fopen(argv[1], "rb");
-	FILE *fd = fopen("d.raw", "rb");
+	FILE *fd = fopen("data.raw", "rb");
     if (fd == NULL) exit(-1);
     fseek(fd, 0, SEEK_END);
     long len = ftell(fd);
@@ -145,6 +145,8 @@ int main(int argc, char **argv) {
 
     int win_width = 80;
     int win_height = 65;
+    int can_width = win_width * 2;
+    int can_height = win_height * 4;
     WINDOW *win = newwin(win_height, win_width, 0, 0);
 	canvas_t canvas = canvas_init(win_width*2, win_height*4);
     
@@ -152,6 +154,7 @@ int main(int argc, char **argv) {
     int ch;
     float view_mid = 0.5;
     float view_size = 1;
+    float vscale = 1;
 
 	while (TRUE) {
         canvas_clear(canvas);
@@ -168,8 +171,10 @@ int main(int argc, char **argv) {
                 break;
             char min, max;
             track_get_minmax(track, st, ed, &min, &max);
+            min = (min - 128) * vscale + 128;
+            max = (max - 128) * vscale + 128;
             for (int y = min; y < max; y++)
-                canvas_set(canvas, i, y);
+                canvas_set(canvas, i, 255-y);
 		}
 
 		canvas_draw(canvas, win);
@@ -186,6 +191,12 @@ int main(int argc, char **argv) {
             case 'o':
                 view_size /= 0.8;
                 //view_size = MIN(view_size, 1);
+                break;
+            case 'I':   // vertical zoom in
+                vscale /= 0.8;
+                break;
+            case 'O':
+                vscale *= 0.8;
                 break;
             case 'l':
                 view_mid += view_size * 0.1;
