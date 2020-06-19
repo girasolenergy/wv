@@ -145,10 +145,10 @@ int main(int argc, char **argv) {
     //return 0;
 
     int win_width = 80;
-    int win_height = 50;
+    int win_height = 65;
     WINDOW *win = newwin(win_height, win_width, 0, 0);
 
-	canvas_t canvas = canvas_init(win_height, win_width);
+	canvas_t canvas = canvas_init(win_width*2, win_height*4);
     
 
     int ch;
@@ -166,7 +166,7 @@ int main(int argc, char **argv) {
             ppp /= 0.8;
         
         canvas_clear(canvas);
-		for (int i = 0; i < win_width; i++) {
+		for (int i = 0; i < win_width*2; i++) {
             //int y = track.buff[i + j];
             //y = MIN(y, canvas.height * 4);
 			//canvas_set(canvas, i, y);
