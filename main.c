@@ -25,6 +25,12 @@ typedef struct {
 	int			height;
 } canvas_t;
 
+void canvas_clear(canvas_t canvas) {
+	for (int i = 0; i < canvas.width * canvas.height; i++) {
+		canvas.buff[i].chars[0] = braille;
+	}
+}
+
 canvas_t canvas_init(int width, int height) {
 	canvas_t canvas;
 	canvas.width = width;
@@ -45,12 +51,6 @@ void canvas_draw(canvas_t canvas, WINDOW *win) {
 	}
 }
 
-void canvas_clear(canvas_t canvas) {
-	for (int i = 0; i < canvas.width * canvas.height; i++) {
-		canvas.buff[i].chars[0] = braille;
-	}
-}
-
 typedef struct {
     int  buff_size;
     char *buff;
@@ -63,11 +63,64 @@ track_t track_init(char *buff, int size) {
     track_t track;
     track.buff_size = size;
     track.buff = buff;
-    track.group_size = 1024;
-    int len = size / track.group_size;
-    track.min = (char*)callc(len, sizeof(char));
-    track.max = (char*)callc(len, sizeof(char));
+    track.group_size = 1 << 10; // must be the power of 2 since we use mask later
+    int num_group = track.buff_size / track.group_size;
+    //printf("buffsize=%d,group_size=%d,num_group=%d\n", size, track.group_size, num_group);
+    track.min = (char*)calloc(num_group, sizeof(char));
+    track.max = (char*)calloc(num_group, sizeof(char));
     
+    char *_buff = track.buff;
+    for (int i = 0; i < num_group; i++) {
+        char _min = 255;
+        char _max = 0;
+        for (int j = 0; j < track.group_size; j++) {
+            _min = MIN(*_buff, _min);
+            _max = MAX(*_buff, _max);
+            _buff++;
+        }
+        track.min[i] = _min;
+        track.max[i] = _max;
+    }
+
+    return track;
+}
+
+void track_get_minmax(track_t track, int start, int end, char *min, char *max) {
+    char _min = 255;
+    char _max = 0;
+    uint32_t _mask = track.group_size - 1;
+    uint32_t num_total_samples = end - start + 1;
+    // ahead of group boundary, iteration one by one slowly
+    int num_slow_samples = (track.group_size - start) & _mask;
+    if (num_slow_samples > num_total_samples)
+        num_slow_samples = num_total_samples;
+    int _end = start + num_slow_samples;
+    int _idx = start;
+    while (_idx < _end) {
+        _min = MIN(track.buff[_idx], _min);
+        _max = MAX(track.buff[_idx], _max);
+        _idx++;
+    }
+    num_total_samples -= num_slow_samples;
+    // contains at least one group
+    while (num_total_samples > track.group_size) {
+        int group_idx = _idx / track.group_size;
+        _min = MIN(track.min[group_idx], _min);
+        _max = MAX(track.max[group_idx], _max);
+        _idx += track.group_size;
+        num_total_samples -= track.group_size;
+    }
+    // behind group boundary, interate one by one slowly
+    int end_idx = _idx + num_total_samples;
+    //printf("%d\n", num_total_samples);
+    while (_idx < end_idx) {
+        _min = MIN(track.buff[_idx], _min);
+        _max = MAX(track.buff[_idx], _max);
+        _idx++;
+    }
+
+    *min = _min;
+    *max = _max;
 }
 
 int main(int argc, char **argv) {
@@ -80,31 +133,51 @@ int main(int argc, char **argv) {
 
 	//FILE *fd = fopen(argv[1], "rb");
 	FILE *fd = fopen("d.raw", "rb");
-	if (fd == NULL) {
-		exit(-1);
-	}
-	char buff[1000];
-	fread(buff, 1, 1000, fd);
+    if (fd == NULL) exit(-1);
+    fseek(fd, 0, SEEK_END);
+    long len = ftell(fd);
+    fseek(fd, 0, SEEK_SET);
+    char *buff = (char *)calloc(len, sizeof(char));
+    fread(buff, 1, len, fd);
+    fclose(fd);
+    
+    track_t track = track_init(buff, len);
+    //return 0;
 
     int win_width = 80;
     int win_height = 50;
     WINDOW *win = newwin(win_height, win_width, 0, 0);
 
 	canvas_t canvas = canvas_init(win_height, win_width);
+    
 
-    int j = 10;
     int ch;
+    float ppp = len / (win_width * 2);
+    int scroll = 0;
 	while (TRUE) {
         ch = getch();
         if (ch == 'l')
-            j++;
+            scroll += ppp*0.2;
+        else if (ch == 'h')
+            scroll -= ppp*0.2;
+        else if (ch == 'i')
+            ppp *= 0.8;
+        else if (ch == 'o')
+            ppp /= 0.8;
         
         canvas_clear(canvas);
-		for (int i = 0; i < 100; i++) {
-            int y = buff[i + j];
-            y = MIN(y, canvas.height * 4);
-			canvas_set(canvas, i, buff[i+j]);
+		for (int i = 0; i < win_width; i++) {
+            //int y = track.buff[i + j];
+            //y = MIN(y, canvas.height * 4);
+			//canvas_set(canvas, i, y);
+            int start = i * ppp + scroll;
+            int end = start + ppp - 1;
+            char min, max;
+            track_get_minmax(track, start, end, &min, &max);
+            for (int y = min; y < max; y++)
+                canvas_set(canvas, i, y);
 		}
+
 		canvas_draw(canvas, win);
     	wrefresh(win);
 	}
