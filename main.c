@@ -180,6 +180,8 @@ int main(int argc, char **argv) {
         switch (ch) {
             case 'i':
                 view_size *= 0.8;
+                float min_size = win_width * 2.0 / len;
+                view_size = MAX(view_size, min_size);
                 break;
             case 'o':
                 view_size /= 0.8;
