@@ -152,30 +152,47 @@ int main(int argc, char **argv) {
     
 
     int ch;
-    float ppp = len / (win_width * 2);
     int scroll = 0;
+
+    float view_mid = 0.5;
+    float view_size = 1;
+
 	while (TRUE) {
         ch = getch();
-        if (ch == 'l')
-            scroll += ppp*0.2;
-        else if (ch == 'h')
-            scroll -= ppp*0.2;
-        else if (ch == 'i')
-            ppp *= 0.8;
-        else if (ch == 'o')
-            ppp /= 0.8;
+        
+        switch (ch) {
+            case 'i':
+                view_size *= 0.8;
+                break;
+            case 'o':
+                view_size /= 0.8;
+                break;
+            case 'l':
+                view_mid += view_size * 0.1;
+                break;
+            case 'h':
+                view_mid -= view_size * 0.1;
+                break;
+            default:
+                break;
+        }
         
         canvas_clear(canvas);
+
+        int view_size_px = view_size * len;
+        int view_mid_px = view_mid * len;
+        int start = view_mid_px - view_size_px / 2;
+        float ppp = view_size_px / (win_width * 2);
 		for (int i = 0; i < win_width*2; i++) {
-            //int y = track.buff[i + j];
-            //y = MIN(y, canvas.height * 4);
-			//canvas_set(canvas, i, y);
-            int start = i * ppp + scroll;
-            int end = start + ppp - 1;
+            //int start = i * ppp + scroll;
+            //int end = start + ppp - 1;
+            int st = start + i * ppp;
+            int ed = st + ppp;
             char min, max;
-            track_get_minmax(track, start, end, &min, &max);
+            track_get_minmax(track, st, ed, &min, &max);
             for (int y = min; y < max; y++)
                 canvas_set(canvas, i, y);
+             
 		}
 
 		canvas_draw(canvas, win);
