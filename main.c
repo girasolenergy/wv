@@ -161,7 +161,11 @@ int main(int argc, char **argv) {
         float ppp = view_size_px / (win_width * 2);
 		for (int i = 0; i < win_width*2; i++) {
             int st = start + i * ppp;
+            if (st < 0)
+                continue;
             int ed = st + ppp;
+            if (ed > len)
+                break;
             char min, max;
             track_get_minmax(track, st, ed, &min, &max);
             for (int y = min; y < max; y++)
@@ -179,6 +183,7 @@ int main(int argc, char **argv) {
                 break;
             case 'o':
                 view_size /= 0.8;
+                //view_size = MIN(view_size, 1);
                 break;
             case 'l':
                 view_mid += view_size * 0.1;
