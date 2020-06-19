@@ -131,8 +131,11 @@ int main(int argc, char **argv) {
     noecho();
     keypad(stdscr, TRUE);
 
-	//FILE *fd = fopen(argv[1], "rb");
-	FILE *fd = fopen("data.raw", "rb");
+    FILE *fd;
+    if (argc > 1)
+	    fd = fopen(argv[1], "rb");
+    else
+	    fd = fopen("data.raw", "rb");
     if (fd == NULL) exit(-1);
     fseek(fd, 0, SEEK_END);
     long len = ftell(fd);
