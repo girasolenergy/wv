@@ -142,24 +142,37 @@ int main(int argc, char **argv) {
     fclose(fd);
     
     track_t track = track_init(buff, len);
-    //return 0;
 
     int win_width = 80;
     int win_height = 65;
     WINDOW *win = newwin(win_height, win_width, 0, 0);
-
 	canvas_t canvas = canvas_init(win_width*2, win_height*4);
     
 
     int ch;
-    int scroll = 0;
-
     float view_mid = 0.5;
     float view_size = 1;
 
 	while (TRUE) {
-        ch = getch();
-        
+        canvas_clear(canvas);
+        int view_size_px = view_size * len;
+        int view_mid_px = view_mid * len;
+        int start = view_mid_px - view_size_px / 2;
+        float ppp = view_size_px / (win_width * 2);
+		for (int i = 0; i < win_width*2; i++) {
+            int st = start + i * ppp;
+            int ed = st + ppp;
+            char min, max;
+            track_get_minmax(track, st, ed, &min, &max);
+            for (int y = min; y < max; y++)
+                canvas_set(canvas, i, y);
+		}
+
+		canvas_draw(canvas, win);
+    	wrefresh(win);
+
+
+        ch = wgetch(win);
         switch (ch) {
             case 'i':
                 view_size *= 0.8;
@@ -176,30 +189,8 @@ int main(int argc, char **argv) {
             default:
                 break;
         }
-        
-        canvas_clear(canvas);
+    }
 
-        int view_size_px = view_size * len;
-        int view_mid_px = view_mid * len;
-        int start = view_mid_px - view_size_px / 2;
-        float ppp = view_size_px / (win_width * 2);
-		for (int i = 0; i < win_width*2; i++) {
-            //int start = i * ppp + scroll;
-            //int end = start + ppp - 1;
-            int st = start + i * ppp;
-            int ed = st + ppp;
-            char min, max;
-            track_get_minmax(track, st, ed, &min, &max);
-            for (int y = min; y < max; y++)
-                canvas_set(canvas, i, y);
-             
-		}
-
-		canvas_draw(canvas, win);
-    	wrefresh(win);
-	}
-
-    sleep(999);
     endwin();
     return 0;
 }
