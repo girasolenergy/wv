@@ -146,8 +146,9 @@ int main(int argc, char **argv) {
     
     track_t track = track_init(buff, len);
 
-    int win_width = COLS;
-    int win_height = LINES;
+    int win_width;// = COLS;
+    int win_height;// = LINES;
+    getmaxyx(stdscr, win_height, win_width);
     int can_width = win_width * 2;
     int can_height = win_height * 4;
     WINDOW *win = newwin(win_height, win_width, 0, 0);
