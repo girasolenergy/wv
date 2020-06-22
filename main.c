@@ -166,6 +166,7 @@ int main(int argc, char **argv) {
         int view_mid_px = view_mid * len;
         int start = view_mid_px - view_size_px / 2;
         float ppp = view_size_px / (win_width * 2);
+
 		for (int i = 0; i < win_width*2; i++) {
             int st = start + i * ppp;
             if (st < 0)
@@ -177,7 +178,7 @@ int main(int argc, char **argv) {
             track_get_minmax(track, st, ed, &min, &max);
             min = (min - 128) * vscale + can_height / 2;
             max = (max - 128) * vscale + can_height / 2;
-            for (int y = min; y < max; y++) {
+            for (int y = min; y <= max; y++) { // should use <= here otherwise missing points
                 int _y = can_height - y;
                 _y = MIN(_y, can_height);
                 _y = MAX(_y, 0);
@@ -186,6 +187,7 @@ int main(int argc, char **argv) {
 		}
 
 		canvas_draw(canvas, win);
+        mvwprintw(win, win_height-1, 0, "ppp=%.0f", ppp);
     	wrefresh(win);
 
 
