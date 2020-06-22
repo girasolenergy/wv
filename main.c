@@ -65,7 +65,6 @@ track_t track_init(char *buff, int size) {
     track.buff = buff;
     track.group_size = 1 << 10; // must be the power of 2 since we use mask later
     int num_group = track.buff_size / track.group_size;
-    //printf("buffsize=%d,group_size=%d,num_group=%d\n", size, track.group_size, num_group);
     track.min = (char*)calloc(num_group, sizeof(char));
     track.max = (char*)calloc(num_group, sizeof(char));
     
@@ -112,7 +111,6 @@ void track_get_minmax(track_t track, int start, int end, char *min, char *max) {
     }
     // behind group boundary, interate one by one slowly
     int end_idx = _idx + num_total_samples;
-    //printf("%d\n", num_total_samples);
     while (_idx < end_idx) {
         _min = MIN(track.buff[_idx], _min);
         _max = MAX(track.buff[_idx], _max);
@@ -187,7 +185,7 @@ int main(int argc, char **argv) {
 		}
 
 		canvas_draw(canvas, win);
-        //mvwprintw(win, win_height-1, 0, "ppp=%.0f", ppp);
+        mvwprintw(win, win_height-1, 0, "ppp=%.0f, wxh=%dx%d", ppp, win_width, win_height);
     	wrefresh(win);
 
 
