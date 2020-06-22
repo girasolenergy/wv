@@ -176,18 +176,18 @@ int main(int argc, char **argv) {
                 break;
             char min, max;
             track_get_minmax(track, st, ed, &min, &max);
-            min = (min - 128) * vscale + can_height / 2;
-            max = (max - 128) * vscale + can_height / 2;
-            for (int y = min; y <= max; y++) { // should use <= here otherwise missing points
+            int _min = (min - 128) * vscale + can_height / 2;
+            int _max = (max - 128) * vscale + can_height / 2;
+            for (int y = _min; y <= _max; y++) { // should use <= here otherwise missing points
                 int _y = can_height - y;
-                _y = MIN(_y, can_height);
+                _y = MIN(_y, can_height-1);
                 _y = MAX(_y, 0);
                 canvas_set(canvas, i, _y);
             }
 		}
 
 		canvas_draw(canvas, win);
-        mvwprintw(win, win_height-1, 0, "ppp=%.0f", ppp);
+        //mvwprintw(win, win_height-1, 0, "ppp=%.0f", ppp);
     	wrefresh(win);
 
 
