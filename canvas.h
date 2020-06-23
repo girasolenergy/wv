@@ -75,41 +75,6 @@ void Canvas::draw(WINDOW *win) {
 	}
 }
 
-int main(int argc, char **argv) {
-    setbuf(stdout, NULL);
-    setlocale(LC_ALL, "");
-    initscr();
-    cbreak();
-    noecho();
-    keypad(stdscr, TRUE);
-
-    int win_width;
-    int win_height;
-    getmaxyx(stdscr, win_height, win_width);
-    int can_width = win_width * 2;
-    int can_height = win_height * 4;
-    WINDOW *win = newwin(win_height, win_width, 0, 0);
-    Canvas can(can_width, can_height);
-
-    for (int i = 0; i < can_width; i++) {
-        can.set(i, i);
-    }
-    can.draw(win);
-    wrefresh(win);
-
-    for (int i = 0; i < can_width; i++) {
-        can.unset(i, i);
-        can.draw(win);
-        wrefresh(win);
-        sleep(1);
-    }
-
-    sleep(10);
-    
-    endwin();
-    return 0;
-}
-
 //} // extern "C"
 
 #endif
