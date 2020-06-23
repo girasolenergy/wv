@@ -44,7 +44,7 @@ class Canvas {
 Canvas::Canvas(uint16_t width, uint16_t height) {
     this->width = width;
     this->height = height;
-    buff = (cchar_t*)calloc(width * height, sizeof(cchar_t));
+    buff = (cchar_t*)calloc(width * height / 8, sizeof(cchar_t));
     clear();
 }
 
@@ -54,27 +54,26 @@ Canvas::~Canvas(void) {
 }
 
 void Canvas::clear(void) {
-    for (int i = 0; i < width * height; i++) {
+    for (int i = 0; i < width * height / 8; i++) {
         buff[i].chars[0] = braille;
     }
 }
 
 void Canvas::set(uint16_t x, uint16_t y) {
-	int idx = y / 4 * width + x / 2;
+	int idx = y / 4 * width / 2 + x / 2;
 	buff[idx].chars[0] |= pixmap[y % 4][x % 2];
 }
 
 void Canvas::unset(uint16_t x, uint16_t y) {
-	int idx = y / 4 * width + x / 2;
+	int idx = y / 4 * width / 2 + x / 2;
 	buff[idx].chars[0] &= ~pixmap[y % 4][x % 2];
 }
 
 void Canvas::draw(WINDOW *win) {
-	for (int row = 0; row < height; row++) {
-		mvwadd_wchnstr(win, row, 0, &buff[row * width], width);
+	for (int row = 0; row < height / 4; row++) {
+		mvwadd_wchnstr(win, row, 0, &buff[row * width / 2], width / 2);
 	}
 }
-
 //} // extern "C"
 
 #endif
