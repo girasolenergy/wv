@@ -19,7 +19,7 @@ class Track {
         int get_blkadd_from_idx(uint32_t idx, uint32_t &blk_idx, uint32_t &blk_sample_idx);
         Block* block_seek(uint32_t &blk_idx, uint32_t &blk_sample_idx, uint32_t num_sample);
         void get_range_minmax(uint32_t &blk_idx, uint32_t &blk_sample_idx, uint32_t num_sample, uint8_t &min, uint8_t &max);
-        void get_disp_data(uint32_t start_sample_idx, uint32_t sample_per_pixel, uint32_t num_pixel, uint8_t *min, uint8_t *max);
+        uint32_t get_disp_data(uint32_t start_sample_idx, uint32_t sample_per_pixel, uint32_t num_pixel, uint8_t *min, uint8_t *max);
 
         std::vector<Block *> blocks;
 };
@@ -115,7 +115,7 @@ void Track::get_range_minmax(uint32_t &blk_idx, uint32_t &blk_sample_idx, uint32
     max = _max;
 }
 
-void Track::get_disp_data(uint32_t start_sample_idx, uint32_t sample_per_pixel, uint32_t num_pixel, uint8_t *min, uint8_t *max) {
+uint32_t Track::get_disp_data(uint32_t start_sample_idx, uint32_t sample_per_pixel, uint32_t num_pixel, uint8_t *min, uint8_t *max) {
     uint32_t blk_idx, blk_sample_idx;
     get_blkadd_from_idx(start_sample_idx, blk_idx, blk_sample_idx);
     int x;
@@ -126,7 +126,7 @@ void Track::get_disp_data(uint32_t start_sample_idx, uint32_t sample_per_pixel, 
         get_range_minmax(blk_idx, blk_sample_idx, sample_per_pixel, min[x], max[x]);
         
     }
-    num_pixel = x;
+    return x;
 }
 
 #endif

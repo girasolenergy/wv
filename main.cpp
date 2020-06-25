@@ -50,23 +50,23 @@ int main(int argc, char **argv) {
     float view_size = 1;
     float vscale = 1;
 
-    int num_pixel = can_width;
+    uint32_t num_pixel;
 	while (TRUE) {
         canvas.clear();
         //int view_size_px = view_size * len;
         //int view_mid_px = view_mid * len;
         //int start = view_mid_px - view_size_px / 2;
         //float ppp = view_size_px / (win_width * 2);
-        int ppp = 100;
+        int ppp = 4800;
         
         uint8_t *buf = (uint8_t *)calloc(buf_len, sizeof(uint8_t));
         fread(buf, 1, buf_len, fd);
         Block *block = new Block(buf, buf_len);
         track.append_block(block);
         
-        track.get_disp_data(0, ppp, num_pixel, min, max);
+        num_pixel = track.get_disp_data(0, ppp, can_width, min, max);
 
-		for (int i = 0; i < can_width; i++) {
+		for (int i = 0; i < num_pixel; i++) {
             int _min = (min[i] - 128) * vscale + can_height / 2;
             int _max = (max[i] - 128) * vscale + can_height / 2;
             for (int y = _min; y <= _max; y++) { // should use <= here otherwise missing points
@@ -78,10 +78,10 @@ int main(int argc, char **argv) {
 		}
 
 		canvas.draw(win);
-        mvwprintw(win, win_height-1, 0, "ppp=%.0f, wxh=%dx%d", ppp, win_width, win_height);
+        mvwprintw(win, win_height-1, 0, "ppp=%d, wxh=%dx%d, num_pixel=%d", ppp, can_width, can_height, num_pixel);
     	wrefresh(win);
         
-        sleep(1);
+        usleep(1e5);
         continue;
 
 
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
             case 'i':
                 view_size *= 0.8;
                 min_size = win_width * 2.0 / len;
-                view_size = MAX(view_size, min_size);
+                view_size = std::max(view_size, min_size);
                 break;
             case 'o':
                 view_size /= 0.8;
