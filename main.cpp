@@ -5,6 +5,7 @@
 #include <curses.h>
 #include <locale.h>
 #include <canvas.h>
+#include <chrono>
 #include "block.h"
 #include "track.h"
 
@@ -30,7 +31,7 @@ int main(int argc, char **argv) {
     //fread(buff, 1, len, fd);
     //fclose(fd);
     
-    uint32_t buf_len = 8192;    // trade off between effiency and wave update rate
+    uint32_t buf_len = 1<<14;    // trade off between effiency and wave update rate
     
 
     int win_width;
@@ -50,21 +51,30 @@ int main(int argc, char **argv) {
     float view_size = 1;
     float vscale = 1;
 
-    uint32_t num_pixel;
+    uint32_t num_pixel = 0;
+    int ppp = 1 << 10;
 	while (TRUE) {
         canvas.clear();
         //int view_size_px = view_size * len;
         //int view_mid_px = view_mid * len;
         //int start = view_mid_px - view_size_px / 2;
         //float ppp = view_size_px / (win_width * 2);
-        int ppp = 4800;
+        if (num_pixel == can_width)
+            ppp *= 2;
         
+        std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
         uint8_t *buf = (uint8_t *)calloc(buf_len, sizeof(uint8_t));
-        fread(buf, 1, buf_len, fd);
+        int ret = fread(buf, 1, buf_len, fd);
+        if (ret < buf_len) {
+            fseek(fd, 0, SEEK_SET);
+            continue;
+        }
         Block *block = new Block(buf, buf_len);
         track.append_block(block);
         
         num_pixel = track.get_disp_data(0, ppp, can_width, min, max);
+        std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+        
 
 		for (int i = 0; i < num_pixel; i++) {
             int _min = (min[i] - 128) * vscale + can_height / 2;
@@ -77,11 +87,13 @@ int main(int argc, char **argv) {
             }
 		}
 
+
 		canvas.draw(win);
-        mvwprintw(win, win_height-1, 0, "ppp=%d, wxh=%dx%d, num_pixel=%d", ppp, can_width, can_height, num_pixel);
+        uint64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        mvwprintw(win, win_height-1, 0, "ppp=%d, wxh=%dx%d, num_pixel=%d, duration=%ldms, data=%.2fMB", ppp, can_width, can_height, num_pixel, duration, num_pixel * ppp * 1.0 / (1<<20));
     	wrefresh(win);
         
-        usleep(1e5);
+        usleep(3e5);
         continue;
 
 
