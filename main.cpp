@@ -5,6 +5,8 @@
 #include <curses.h>
 #include <locale.h>
 #include <canvas.h>
+#include "block.h"
+#include "track.h"
 
 
 typedef struct {

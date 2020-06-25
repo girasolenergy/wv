@@ -1,3 +1,4 @@
 ncurses-example*
 *.raw
+*.out
 wv
