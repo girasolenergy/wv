@@ -27,22 +27,16 @@ int main(int argc, char **argv) {
     fseek(fd, 0, SEEK_END);
     long len = ftell(fd);
     fseek(fd, 0, SEEK_SET);
-    //char *buff = (char *)calloc(len, sizeof(char));
-    //fread(buff, 1, len, fd);
-    //fclose(fd);
-    
-    uint32_t buf_len = 1<<14;    // trade off between effiency and wave update rate
-    
 
-    int win_width;
-    int win_height;// = LINES;
+    int win_width, win_height;
     getmaxyx(stdscr, win_height, win_width);
     int can_width = win_width * 2;
     int can_height = win_height * 4;
     WINDOW *win = newwin(win_height, win_width, 0, 0);
+
+    uint32_t buf_len = 1<<14;    // trade off between effiency and wave update rate
 	Canvas canvas(win_width*2, win_height*4);
     Track track(65536);
-
     uint8_t *min = (uint8_t *)calloc(can_width, sizeof(uint8_t));
     uint8_t *max = (uint8_t *)calloc(can_width, sizeof(uint8_t));
 
@@ -52,7 +46,8 @@ int main(int argc, char **argv) {
     float vscale = 1;
 
     uint32_t num_pixel = 0;
-    int ppp = 1 << 10;
+    int ppp = 1000;
+
 	while (TRUE) {
         canvas.clear();
         //int view_size_px = view_size * len;
@@ -74,7 +69,6 @@ int main(int argc, char **argv) {
         
         num_pixel = track.get_disp_data(0, ppp, can_width, min, max);
         std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-        
 
 		for (int i = 0; i < num_pixel; i++) {
             int _min = (min[i] - 128) * vscale + can_height / 2;
@@ -86,14 +80,13 @@ int main(int argc, char **argv) {
                 canvas.set(i, _y);
             }
 		}
-
-
 		canvas.draw(win);
+
         uint64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
         mvwprintw(win, win_height-1, 0, "ppp=%d, wxh=%dx%d, num_pixel=%d, duration=%ldms, data=%.2fMB", ppp, can_width, can_height, num_pixel, duration, num_pixel * ppp * 1.0 / (1<<20));
     	wrefresh(win);
         
-        usleep(3e5);
+        usleep(333e2); // 333ms
         continue;
 
 
