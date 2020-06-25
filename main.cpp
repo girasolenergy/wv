@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 	    fd = fopen("data.raw", "rb");
     if (fd == NULL) exit(-1);
     fseek(fd, 0, SEEK_END);
-    long len = ftell(fd);
+    //long len = ftell(fd);
     fseek(fd, 0, SEEK_SET);
 
     int win_width, win_height;
@@ -54,8 +54,8 @@ int main(int argc, char **argv) {
         //int view_mid_px = view_mid * len;
         //int start = view_mid_px - view_size_px / 2;
         //float ppp = view_size_px / (win_width * 2);
-        if (num_pixel == can_width)
-            ppp *= 2;
+        //if (num_pixel == can_width)
+        //    ppp *= 2;
         
         std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
         uint8_t *buf = (uint8_t *)calloc(buf_len, sizeof(uint8_t));
@@ -67,7 +67,17 @@ int main(int argc, char **argv) {
         Block *block = new Block(buf, buf_len);
         track.append_block(block);
         
-        num_pixel = track.get_disp_data(0, ppp, can_width, min, max);
+        uint32_t view_size_px = 100000;
+        int32_t len = track.get_len() - view_size_px;
+        uint32_t start;
+        if (len < 0)
+            start = 0;
+        else
+            start = len;
+        //uint32_t start = std::max(0, uint32_t(len - 200000));
+        ppp = view_size_px / can_width;
+        
+        num_pixel = track.get_disp_data(start, ppp, can_width, min, max);
         std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 
 		for (int i = 0; i < num_pixel; i++) {
@@ -86,7 +96,7 @@ int main(int argc, char **argv) {
         mvwprintw(win, win_height-1, 0, "ppp=%d, wxh=%dx%d, num_pixel=%d, duration=%ldms, data=%.2fMB", ppp, can_width, can_height, num_pixel, duration, num_pixel * ppp * 1.0 / (1<<20));
     	wrefresh(win);
         
-        usleep(333e2); // 333ms
+        usleep(333e3); // 333ms
         continue;
 
 
