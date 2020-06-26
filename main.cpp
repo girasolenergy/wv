@@ -6,9 +6,18 @@
 #include <locale.h>
 #include <canvas.h>
 #include <chrono>
+#include <queue>
+#include <thread>
 #include "block.h"
 #include "track.h"
 
+
+void read_key(WINDOW *win, std::queue<int> &queue) {
+    while (TRUE) {
+        int ch = wgetch(win);
+        queue.push(ch);
+    }
+}
 
 int main(int argc, char **argv) {
     setbuf(stdout, NULL);
@@ -39,6 +48,8 @@ int main(int argc, char **argv) {
     Track track(65536);
     uint8_t *min = (uint8_t *)calloc(can_width, sizeof(uint8_t));
     uint8_t *max = (uint8_t *)calloc(can_width, sizeof(uint8_t));
+    std::queue<int> queue;
+    std::thread th(read_key, win, std::ref(queue));
 
     int ch;
     float view_mid = 0.5;
@@ -92,8 +103,14 @@ int main(int argc, char **argv) {
 		}
 		canvas.draw(win);
 
+        int key = -1;
+        if (!queue.empty()) {
+            key = queue.front();
+            queue.pop();
+        } else {
+        }
         uint64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-        mvwprintw(win, win_height-1, 0, "ppp=%d, wxh=%dx%d, num_pixel=%d, duration=%ldms, data=%.2fMB", ppp, can_width, can_height, num_pixel, duration, num_pixel * ppp * 1.0 / (1<<20));
+        mvwprintw(win, win_height-1, 0, "ppp=%d, wxh=%dx%d, num_pixel=%d, duration=%ldms, data=%.2fMB, key=%d", ppp, can_width, can_height, num_pixel, duration, num_pixel * ppp * 1.0 / (1<<20), key);
     	wrefresh(win);
         
         usleep(333e3); // 333ms
@@ -128,6 +145,8 @@ int main(int argc, char **argv) {
                 break;
         }
     }
+
+    th.join();
 
     endwin();
     return 0;

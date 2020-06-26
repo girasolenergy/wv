@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-I.
-LDLIBS=-lm -lncursesw
+LDLIBS=-lm -lncursesw -lpthread
 
 wv: main.cpp block.h track.h
 	$(CC) -o wv main.cpp -I. $(LDLIBS)
