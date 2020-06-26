@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
         mvwprintw(win, win_height-1, 0, "ppp=%d, wxh=%dx%d, num_pixel=%d, duration=%ldms, data=%.2fMB, key=%d", ppp, can_width, can_height, num_pixel, duration, num_pixel * ppp * 1.0 / (1<<20), key);
     	wrefresh(win);
         
-        //usleep(50e3); // 10ms
+        usleep(50e3); // 10ms
         continue;
 
 

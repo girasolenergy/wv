@@ -8,6 +8,7 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
+#include <mutex>
 #include "block.h"
 
 
@@ -22,23 +23,34 @@ class Track {
         uint32_t get_disp_data(uint32_t start_sample_idx, uint32_t sample_per_pixel, uint32_t num_pixel, uint8_t *min, uint8_t *max);
 
         std::vector<Block *> blocks;
+        std::mutex mutex;
+        uint32_t len;
 };
 
 Track::Track(uint32_t num_block) {
     blocks.reserve(num_block);
+    len = 0;
 }
 
 int Track::append_block(Block *block) {
+    mutex.lock();
+    len += block->len;
     blocks.push_back(block);
+    mutex.unlock();
+    
     return 0;
 }
 
 uint32_t Track::get_len(void) {
-    uint32_t num = 0;
-    for (uint32_t i = 0; i < blocks.size(); i++) {
-        num += blocks[i]->len;
-    }
-    return num;
+    //uint32_t num = 0;
+    //for (uint32_t i = 0; i < blocks.size(); i++) {
+    //    num += blocks[i]->len;
+    //}
+    //return num;
+    mutex.lock();
+    uint32_t ret = len;
+    mutex.unlock();
+    return ret;
 }
 
 int Track::get_blkadd_from_idx(uint32_t idx, uint32_t &blk_idx, uint32_t &blk_sample_idx) {
