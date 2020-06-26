@@ -20,6 +20,7 @@ void read_key(WINDOW *win, std::queue<int> &queue) {
 }
 
 void read_wav(FILE *fd, Track *track, uint32_t buf_len) {
+    int delay = buf_len / 48000.0 * 1000000; 
     while (1) {
         uint8_t *buf = (uint8_t *)calloc(buf_len, sizeof(uint8_t));
         int ret = fread(buf, 1, buf_len, fd);
@@ -30,7 +31,7 @@ void read_wav(FILE *fd, Track *track, uint32_t buf_len) {
         Block *block = new Block(buf, buf_len);
         track->append_block(block);
 
-        usleep(333e3); // 333ms
+        usleep(delay); // 333ms
     }
     
 }
@@ -59,7 +60,7 @@ int main(int argc, char **argv) {
     int can_height = win_height * 4;
     WINDOW *win = newwin(win_height, win_width, 0, 0);
 
-    uint32_t buf_len = 1<<14;    // trade off between effiency and wave update rate
+    uint32_t buf_len = 1<<12;    // trade off between effiency and wave update rate
 	Canvas canvas(win_width*2, win_height*4);
     Track track(65536);
     uint8_t *min = (uint8_t *)calloc(can_width, sizeof(uint8_t));
@@ -74,8 +75,9 @@ int main(int argc, char **argv) {
     float vscale = 1;
 
     uint32_t num_pixel = 0;
-    int ppp = 1000;
+    int ppp = 4000;
 
+    uint32_t start = 0;
 	while (TRUE) {
         canvas.clear();
         //int view_size_px = view_size * len;
@@ -87,7 +89,6 @@ int main(int argc, char **argv) {
         
         std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
        
-        uint32_t start;
         //uint32_t view_size_px = 100000;
         //int32_t len = track.get_len() - view_size_px;
         //if (len < 0)
@@ -97,7 +98,6 @@ int main(int argc, char **argv) {
         //ppp = view_size_px / can_width;
 
         
-        start = 0;
         num_pixel = track.get_disp_data(start, ppp, can_width, min, max);
         std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 
@@ -127,6 +127,12 @@ int main(int argc, char **argv) {
                     ppp *= 2;
                     //ppp = std::max(ppp, 1);
                     break;
+                case 'l':   // pan right
+                    start += can_width * ppp * 0.2;
+                    break;
+                case 'h':
+                    start -= can_width * ppp * 0.2;
+                    start = std::max(start, (uint32_t)0);
                 default:
                     break;
             }
@@ -136,7 +142,7 @@ int main(int argc, char **argv) {
         mvwprintw(win, win_height-1, 0, "ppp=%d, wxh=%dx%d, num_pixel=%d, duration=%ldms, data=%.2fMB, key=%d", ppp, can_width, can_height, num_pixel, duration, num_pixel * ppp * 1.0 / (1<<20), key);
     	wrefresh(win);
         
-        usleep(50e3); // 10ms
+        //usleep(50e3); // 10ms
         continue;
 
 
