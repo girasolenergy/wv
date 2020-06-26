@@ -19,6 +19,22 @@ void read_key(WINDOW *win, std::queue<int> &queue) {
     }
 }
 
+void read_wav(FILE *fd, Track *track, uint32_t buf_len) {
+    while (1) {
+        uint8_t *buf = (uint8_t *)calloc(buf_len, sizeof(uint8_t));
+        int ret = fread(buf, 1, buf_len, fd);
+        if (ret < buf_len) {
+            fseek(fd, 0, SEEK_SET);
+            continue;
+        }
+        Block *block = new Block(buf, buf_len);
+        track->append_block(block);
+
+        usleep(333e3); // 333ms
+    }
+    
+}
+
 int main(int argc, char **argv) {
     setbuf(stdout, NULL);
     setlocale(LC_ALL, "");
@@ -49,7 +65,8 @@ int main(int argc, char **argv) {
     uint8_t *min = (uint8_t *)calloc(can_width, sizeof(uint8_t));
     uint8_t *max = (uint8_t *)calloc(can_width, sizeof(uint8_t));
     std::queue<int> queue;
-    std::thread th(read_key, win, std::ref(queue));
+    std::thread th1(read_key, win, std::ref(queue));
+    std::thread th2(read_wav, fd, &track, buf_len);
 
     int ch;
     float view_mid = 0.5;
@@ -69,15 +86,7 @@ int main(int argc, char **argv) {
         //    ppp *= 2;
         
         std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-        uint8_t *buf = (uint8_t *)calloc(buf_len, sizeof(uint8_t));
-        int ret = fread(buf, 1, buf_len, fd);
-        if (ret < buf_len) {
-            fseek(fd, 0, SEEK_SET);
-            continue;
-        }
-        Block *block = new Block(buf, buf_len);
-        track.append_block(block);
-        
+       
         uint32_t start;
         //uint32_t view_size_px = 100000;
         //int32_t len = track.get_len() - view_size_px;
@@ -127,7 +136,7 @@ int main(int argc, char **argv) {
         mvwprintw(win, win_height-1, 0, "ppp=%d, wxh=%dx%d, num_pixel=%d, duration=%ldms, data=%.2fMB, key=%d", ppp, can_width, can_height, num_pixel, duration, num_pixel * ppp * 1.0 / (1<<20), key);
     	wrefresh(win);
         
-        usleep(333e3); // 333ms
+        usleep(50e3); // 10ms
         continue;
 
 
@@ -160,7 +169,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    th.join();
+    th1.join();
+    th2.join();
 
     endwin();
     return 0;
