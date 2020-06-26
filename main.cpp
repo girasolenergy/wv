@@ -78,16 +78,17 @@ int main(int argc, char **argv) {
         Block *block = new Block(buf, buf_len);
         track.append_block(block);
         
-        uint32_t view_size_px = 100000;
-        int32_t len = track.get_len() - view_size_px;
         uint32_t start;
-        if (len < 0)
-            start = 0;
-        else
-            start = len;
-        //uint32_t start = std::max(0, uint32_t(len - 200000));
-        ppp = view_size_px / can_width;
+        //uint32_t view_size_px = 100000;
+        //int32_t len = track.get_len() - view_size_px;
+        //if (len < 0)
+        //    start = 0;
+        //else
+        //    start = len;
+        //ppp = view_size_px / can_width;
+
         
+        start = 0;
         num_pixel = track.get_disp_data(start, ppp, can_width, min, max);
         std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 
@@ -107,6 +108,19 @@ int main(int argc, char **argv) {
         if (!queue.empty()) {
             key = queue.front();
             queue.pop();
+
+            switch (key) {
+                case 'i':
+                    ppp *= 0.5;
+                    ppp = std::max(ppp, 1);
+                    break;
+                case 'o':
+                    ppp *= 2;
+                    //ppp = std::max(ppp, 1);
+                    break;
+                default:
+                    break;
+            }
         } else {
         }
         uint64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
@@ -122,7 +136,7 @@ int main(int argc, char **argv) {
         switch (ch) {
             case 'i':
                 view_size *= 0.8;
-                min_size = win_width * 2.0 / len;
+                //min_size = win_width * 2.0 / len;
                 view_size = std::max(view_size, min_size);
                 break;
             case 'o':
