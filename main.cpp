@@ -19,7 +19,7 @@ void read_key(WINDOW *win, std::queue<int> &queue) {
     }
 }
 
-void read_wav(FILE *fd, Track *track, uint32_t buf_len) {
+void read_wav(FILE *fd, Track *track, uint32_t buf_len, bool &doread) {
     int delay = buf_len / 48000.0 * 1000000; 
     while (1) {
         uint8_t *buf = (uint8_t *)calloc(buf_len, sizeof(uint8_t));
@@ -28,8 +28,10 @@ void read_wav(FILE *fd, Track *track, uint32_t buf_len) {
             fseek(fd, 0, SEEK_SET);
             continue;
         }
-        Block *block = new Block(buf, buf_len);
-        track->append_block(block);
+        if (doread) {
+            Block *block = new Block(buf, buf_len);
+            track->append_block(block);
+        }
 
         usleep(delay); // 333ms
     }
@@ -42,7 +44,7 @@ int main(int argc, char **argv) {
     initscr();
     cbreak();
     noecho();
-    keypad(stdscr, TRUE);
+    //keypad(stdscr, TRUE);
 
     FILE *fd;
     if (argc > 1)
@@ -59,6 +61,7 @@ int main(int argc, char **argv) {
     int can_width = win_width * 2;
     int can_height = win_height * 4;
     WINDOW *win = newwin(win_height, win_width, 0, 0);
+    keypad(win, TRUE);
 
     uint32_t buf_len = 1<<12;    // trade off between effiency and wave update rate
 	Canvas canvas(win_width*2, win_height*4);
@@ -67,7 +70,8 @@ int main(int argc, char **argv) {
     uint8_t *max = (uint8_t *)calloc(can_width, sizeof(uint8_t));
     std::queue<int> queue;
     std::thread th1(read_key, win, std::ref(queue));
-    std::thread th2(read_wav, fd, &track, buf_len);
+    bool doread = true;
+    std::thread th2(read_wav, fd, &track, buf_len, std::ref(doread));
 
     int ch;
     float view_mid = 0.5;
@@ -133,6 +137,10 @@ int main(int argc, char **argv) {
                 case 'h':
                     start -= can_width * ppp * 0.2;
                     start = std::max(start, (uint32_t)0);
+                    break;
+                case 'p':   // pause
+                    doread = !doread;
+                    break;
                 default:
                     break;
             }

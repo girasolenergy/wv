@@ -18,7 +18,7 @@ class Track {
         int append_block(Block *block);
         uint32_t get_len(void);
         int get_blkadd_from_idx(uint32_t idx, uint32_t &blk_idx, uint32_t &blk_sample_idx);
-        Block* block_seek(uint32_t &blk_idx, uint32_t &blk_sample_idx, uint32_t num_sample);
+        Block* block_advance(uint32_t &blk_idx, uint32_t &blk_sample_idx, uint32_t num_sample);
         void get_range_minmax(uint32_t &blk_idx, uint32_t &blk_sample_idx, uint32_t num_sample, uint8_t &min, uint8_t &max);
         uint32_t get_disp_data(uint32_t start_sample_idx, uint32_t sample_per_pixel, uint32_t num_pixel, uint8_t *min, uint8_t *max);
 
@@ -65,7 +65,7 @@ int Track::get_blkadd_from_idx(uint32_t idx, uint32_t &blk_idx, uint32_t &blk_sa
     return 0;
 }
 
-Block* Track::block_seek(uint32_t &blk_idx, uint32_t &blk_sample_idx, uint32_t num_sample) {
+Block* Track::block_advance(uint32_t &blk_idx, uint32_t &blk_sample_idx, uint32_t num_sample) {
     Block *blk = blocks[blk_idx];
     while (num_sample > 0) {
         if (blk_sample_idx + num_sample < blk->len) {
@@ -97,7 +97,7 @@ void Track::get_range_minmax(uint32_t &blk_idx, uint32_t &blk_sample_idx, uint32
         _max = std::max(_max, blk->buff[i]);
     }
     num_sample -= num_slow_sample;
-    blk = block_seek(blk_idx, blk_sample_idx, num_slow_sample);
+    blk = block_advance(blk_idx, blk_sample_idx, num_slow_sample);
     // fast lookup
     while (blk && num_sample > blk->bin_size) {
         uint32_t num_bin = num_sample / blk->bin_size;
@@ -111,7 +111,7 @@ void Track::get_range_minmax(uint32_t &blk_idx, uint32_t &blk_sample_idx, uint32
         }
         uint32_t num_fast_sample = num_bin * blk->bin_size;
         num_sample -= num_fast_sample;
-        blk = block_seek(blk_idx, blk_sample_idx, num_fast_sample);
+        blk = block_advance(blk_idx, blk_sample_idx, num_fast_sample);
     }
     // behind bin boundary, iterate slowly
     while (blk && num_sample) {
@@ -121,7 +121,7 @@ void Track::get_range_minmax(uint32_t &blk_idx, uint32_t &blk_sample_idx, uint32
             _max = std::max(_max, blk->buff[i]);
         }
         num_sample -= num_sample_blk;
-        blk = block_seek(blk_idx, blk_sample_idx, num_sample_blk);
+        blk = block_advance(blk_idx, blk_sample_idx, num_sample_blk);
     }
     min = _min;
     max = _max;
