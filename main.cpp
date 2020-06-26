@@ -20,7 +20,7 @@ void read_key(WINDOW *win, std::queue<int> &queue) {
 }
 
 void read_wav(FILE *fd, Track *track, uint32_t buf_len, bool &doread) {
-    int delay = buf_len / 48000.0 * 1000000; 
+    int delay = buf_len / 480000.0 * 1000000; 
     while (1) {
         uint8_t *buf = (uint8_t *)calloc(buf_len, sizeof(uint8_t));
         int ret = fread(buf, 1, buf_len, fd);
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
     float vscale = 1;
 
     uint32_t num_pixel = 0;
-    int ppp = 4000;
+    int ppp = 4096;
 
     uint32_t start = 0;
 	while (TRUE) {
@@ -132,10 +132,10 @@ int main(int argc, char **argv) {
                     //ppp = std::max(ppp, 1);
                     break;
                 case 'l':   // pan right
-                    start += can_width * ppp * 0.2;
+                    start += can_width * ppp * 0.1;
                     break;
                 case 'h':
-                    start -= can_width * ppp * 0.2;
+                    start -= can_width * ppp * 0.1;
                     start = std::max(start, (uint32_t)0);
                     break;
                 case 'p':   // pause
@@ -152,35 +152,6 @@ int main(int argc, char **argv) {
         
         usleep(50e3); // 10ms
         continue;
-
-
-        ch = wgetch(win);
-        float min_size; 
-        switch (ch) {
-            case 'i':
-                view_size *= 0.8;
-                //min_size = win_width * 2.0 / len;
-                view_size = std::max(view_size, min_size);
-                break;
-            case 'o':
-                view_size /= 0.8;
-                //view_size = MIN(view_size, 1);
-                break;
-            case 'I':   // vertical zoom in
-                vscale /= 0.8;
-                break;
-            case 'O':
-                vscale *= 0.8;
-                break;
-            case 'l':
-                view_mid += view_size * 0.1;
-                break;
-            case 'h':
-                view_mid -= view_size * 0.1;
-                break;
-            default:
-                break;
-        }
     }
 
     th1.join();

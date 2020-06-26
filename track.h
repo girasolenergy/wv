@@ -114,7 +114,7 @@ void Track::get_range_minmax(uint32_t &blk_idx, uint32_t &blk_sample_idx, uint32
         blk = block_advance(blk_idx, blk_sample_idx, num_fast_sample);
     }
     // behind bin boundary, iterate slowly
-    while (blk && num_sample) {
+    while (blk && num_sample > 0) {
         uint32_t num_sample_blk = std::min(num_sample, blk->len - blk_sample_idx);
         for (int i = blk_sample_idx; i < blk_sample_idx + num_sample_blk; i++) {
             _min = std::min(_min, blk->buff[i]);
