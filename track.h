@@ -57,7 +57,7 @@ int Track::get_blkadd_from_idx(uint32_t idx, uint32_t &blk_idx, uint32_t &blk_sa
     if (idx >= get_len())
         return -1;
     blk_idx = 0;
-    while (idx > blocks[blk_idx]->len) {
+    while (idx >= blocks[blk_idx]->len) {
         idx -= blocks[blk_idx]->len;
         blk_idx++;
     }
@@ -129,7 +129,9 @@ void Track::get_range_minmax(uint32_t &blk_idx, uint32_t &blk_sample_idx, uint32
 
 uint32_t Track::get_disp_data(uint32_t start_sample_idx, uint32_t sample_per_pixel, uint32_t num_pixel, uint8_t *min, uint8_t *max) {
     uint32_t blk_idx, blk_sample_idx;
-    get_blkadd_from_idx(start_sample_idx, blk_idx, blk_sample_idx);
+    int ret = get_blkadd_from_idx(start_sample_idx, blk_idx, blk_sample_idx);
+    if (ret == -1)
+        return 0;
     int x;
     for (x = 0; x < num_pixel; x++) {
         if (blk_idx >= blocks.size())
