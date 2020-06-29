@@ -2,9 +2,13 @@ CC=g++
 CFLAGS=-I.
 LDLIBS=-lm -lncursesw -lpthread
 
+all: wv run
+
 wv: main.cpp block.h track.h
 	$(CC) -o wv main.cpp -I. $(LDLIBS)
-	#./wv d.raw
+
+run: wv
+	./wv ddd.raw
 
 clean:
 	rm wv
