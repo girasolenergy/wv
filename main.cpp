@@ -20,7 +20,7 @@ void read_key(WINDOW *win, std::queue<int> &queue) {
 }
 
 void read_wav(FILE *fd, Track *track, uint32_t buf_len, bool &doread) {
-    int delay = buf_len / 480000.0 * 1000000; 
+    int delay = buf_len / 48000.0 * 1000000; 
     while (1) {
         uint8_t *buf = (uint8_t *)calloc(buf_len, sizeof(uint8_t));
         int ret = fread(buf, 1, buf_len, fd);
@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
     WINDOW *win = newwin(win_height, win_width, 0, 0);
     keypad(win, TRUE);
 
-    uint32_t buf_len = 1<<12;    // trade off between effiency and wave update rate
+    uint32_t buf_len = 1<<14;    // trade off between effiency and wave update rate
 	Canvas canvas(win_width*2, win_height*4);
     Track track(65536);
     uint8_t *min = (uint8_t *)calloc(can_width, sizeof(uint8_t));
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
     float vscale = 1;
 
     uint32_t num_pixel = 0;
-    int ppp = 4096;
+    int ppp = buf_len / 4;
 
     uint32_t start = 0;
 	while (TRUE) {
