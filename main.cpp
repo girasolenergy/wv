@@ -121,6 +121,7 @@ int main(int argc, char **argv) {
         if (!queue.empty()) {
             key = queue.front();
             queue.pop();
+            uint32_t pan_step = can_width * 0.1;
 
             switch (key) {
                 case 'i':
@@ -132,10 +133,10 @@ int main(int argc, char **argv) {
                     //ppp = std::max(ppp, 1);
                     break;
                 case 'l':   // pan right
-                    start += can_width * ppp * 0.1;
+                    start += pan_step * ppp;
                     break;
                 case 'h':
-                    start -= can_width * ppp * 0.1;
+                    start -= pan_step * ppp;
                     start = std::max(start, (uint32_t)0);
                     break;
                 case 'p':   // pause
