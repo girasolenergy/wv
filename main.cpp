@@ -74,14 +74,13 @@ int main(int argc, char **argv) {
     std::thread th2(read_wav, fd, &track, buf_len, std::ref(doread));
 
     int ch;
-    float view_mid = 0.5;
     float view_size = 1;
     float vscale = 1;
 
     uint32_t num_pixel = 0;
-    int ppp = buf_len / 4;
-
+    int ppp = buf_len / 64;
     uint32_t start = 0;
+
 	while (TRUE) {
         canvas.clear();
         //int view_size_px = view_size * len;
@@ -102,6 +101,8 @@ int main(int argc, char **argv) {
         //ppp = view_size_px / can_width;
 
         
+        uint32_t view_mid = start + ppp * can_width / 2;
+        uint32_t view_len = ppp * can_width;
         num_pixel = track.get_disp_data(start, ppp, can_width, min, max);
         std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 
@@ -125,11 +126,13 @@ int main(int argc, char **argv) {
 
             switch (key) {
                 case 'i':
+                    start += (can_width * 0.5 / 2) * ppp;
                     ppp *= 0.5;
                     ppp = std::max(ppp, 1);
                     break;
                 case 'o':
                     ppp *= 2;
+                    start -= (can_width * 0.5 / 2) * ppp;
                     //ppp = std::max(ppp, 1);
                     break;
                 case 'l':   // pan right
