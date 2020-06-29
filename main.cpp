@@ -35,7 +35,6 @@ void read_wav(FILE *fd, Track *track, uint32_t buf_len, bool &doread) {
             Block *block = new Block(buf, buf_len);
             track->append_block(block);
         }
-
         //usleep(delay); // 333ms
     }
     
@@ -49,8 +48,11 @@ int main(int argc, char **argv) {
     noecho();
 
     FILE *fd;
-    if (argc > 1)
-	    fd = fopen(argv[1], "rb");
+    if (argc == 1) {
+        endwin();
+        return 0;
+    }
+	fd = fopen(argv[1], "rb");
     if (fd == NULL) exit(-1);
 
     int win_width, win_height;
