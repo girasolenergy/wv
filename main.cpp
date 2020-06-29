@@ -10,6 +10,7 @@
 #include <thread>
 #include "block.h"
 #include "track.h"
+#include "limits.h"
 
 
 void read_key(WINDOW *win, std::queue<int> &queue) {
@@ -78,8 +79,8 @@ int main(int argc, char **argv) {
     float vscale = 1;
 
     uint32_t num_pixel = 0;
-    int ppp = buf_len / 64;
-    uint32_t start = 0;
+    int ppp = buf_len / 4;
+    int32_t start = 0;
 
 	while (TRUE) {
         canvas.clear();
@@ -126,21 +127,32 @@ int main(int argc, char **argv) {
 
             switch (key) {
                 case 'i':
-                    start += (can_width * 0.5 / 2) * ppp;
+                    if (ppp / 2 < 1)
+                        break;
+                    //start += (can_width * 0.5 / 2) * ppp;
+                    if (num_pixel >= can_width)
+                        start += (num_pixel * 0.5 / 2) * ppp;
                     ppp *= 0.5;
-                    ppp = std::max(ppp, 1);
+                    //ppp = std::max(ppp, 1);
                     break;
                 case 'o':
+                    //int32_t tmp = start - (can_width * 0.5 / 2) * ppp;
+                    if (ppp >= INT_MAX / 2)
+                        break;
                     ppp *= 2;
                     start -= (can_width * 0.5 / 2) * ppp;
+                    start = std::max(start, 0);
                     //ppp = std::max(ppp, 1);
                     break;
                 case 'l':   // pan right
+                    if (start > INT_MAX - pan_step * ppp)
+                        break;
                     start += pan_step * ppp;
+                    
                     break;
                 case 'h':
                     start -= pan_step * ppp;
-                    start = std::max(start, (uint32_t)0);
+                    start = std::max(start, 0);
                     break;
                 case 'p':   // pause
                     doread = !doread;
@@ -151,10 +163,10 @@ int main(int argc, char **argv) {
         } else {
         }
         uint64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-        mvwprintw(win, win_height-1, 0, "ppp=%d, wxh=%dx%d, num_pixel=%d, duration=%ldms, data=%.2fMB, key=%d", ppp, can_width, can_height, num_pixel, duration, num_pixel * ppp * 1.0 / (1<<20), key);
+        mvwprintw(win, win_height-1, 0, "ppp=%d, wxh=%dx%d, num_pixel=%d, duration=%ldms, data=%.2fMB, num_pixel=%d, start=%u", ppp, can_width, can_height, num_pixel, duration, num_pixel * ppp * 1.0 / (1<<20), num_pixel, start);
     	wrefresh(win);
         
-        usleep(50e3); // 10ms
+        usleep(20e3); // 10ms
         continue;
     }
 
