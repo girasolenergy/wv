@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
-#include <curses.h>
-#include <locale.h>
 #include <canvas.h>
 #include <chrono>
 #include <queue>
@@ -16,22 +14,16 @@
 
 
 void read_wav(Draw *draw, FILE *fd, Track *track, uint32_t buf_len, bool &doread) {
-    int delay = buf_len / 48000.0 * 1000000; 
     while (1) {
         uint8_t *buf = (uint8_t *)calloc(buf_len, sizeof(uint8_t));
         int ret = fread(buf, 1, buf_len, fd);
         if (ret == 0)
             break;
-        //if (ret < buf_len) {
-        //    fseek(fd, 0, SEEK_SET);
-        //    continue;
-        //}
         if (doread) {
             Block *block = new Block(buf, buf_len);
             track->append_block(block);
             draw->dodraw();
         }
-        //usleep(delay); // 333ms
     }
     
 }
@@ -91,7 +83,6 @@ void handle_event(Draw *draw, bool &doread) {
             draw->dodraw();
         }
     }
-
 }
 
 
@@ -103,22 +94,18 @@ int main(int argc, char **argv) {
     int win_w, win_h;
     win_w = tb_width();
     win_h = tb_height();
-    tb_present();
 
-    FILE *fd;
     if (argc == 1) {
         tb_shutdown();
         return 0;
     }
-	fd = fopen(argv[1], "rb");
+	FILE *fd = fopen(argv[1], "rb");
     if (fd == NULL) exit(-1);
-
 
     Track track(65536);
     int can_width = win_w * 2;
     int can_height = win_h * 4;
 	Canvas canvas(can_width, can_height);
-
     Draw draw(&canvas, &track);
 
     bool doread = true;
@@ -126,12 +113,12 @@ int main(int argc, char **argv) {
     std::thread th1(read_wav, &draw, fd, &track, buf_len, std::ref(doread));
     std::thread th2(handle_event, &draw, std::ref(doread));
     
-
-
 	while (true) {
         sleep(1);
     }
 
     th1.join();
+    th2.join();
+
     return 0;
 }

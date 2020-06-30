@@ -23,7 +23,7 @@ Draw::Draw(Canvas *canvas, Track *track) {
     this->canvas = canvas;
     this->track = track;
     start = 0;
-    ppp = 4096;
+    ppp = 4096*8;
     vscale = 1;
     num_pixel = 0;
     min = (uint8_t *)calloc(canvas->width, sizeof(uint8_t));

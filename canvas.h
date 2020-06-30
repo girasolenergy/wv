@@ -7,8 +7,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
-#include <curses.h>
-#include <locale.h>
 #include "termbox.h"
 
 

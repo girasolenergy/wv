@@ -1,10 +1,10 @@
 CC=g++
 CFLAGS=-I.
-LDLIBS=-lm -lncursesw -lpthread -ltermbox
+LDLIBS=-lm -lpthread -ltermbox
 
 all: wv run
 
-wv: main.cpp block.h track.h
+wv: main.cpp block.h track.h draw.h
 	$(CC) -o wv main.cpp -I. $(LDLIBS)
 
 run: wv
