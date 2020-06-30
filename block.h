@@ -64,10 +64,5 @@ void Block::update_minmax(void) {
     }
 }
 
-//int main() {
-//    Block blk(NULL, 1025);
-//    return 0;
-//}
-
 
 #endif

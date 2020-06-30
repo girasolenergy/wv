@@ -1,8 +1,6 @@
 #ifndef __CANVAS_H__
 #define __CANVAS_H__
 
-//extern "C" {
-//
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -63,17 +61,11 @@ void Canvas::unset(uint16_t x, uint16_t y) {
 }
 
 void Canvas::draw(void) {
-	//for (int row = 0; row < height / 4; row++) {
-	//	mvwadd_wchnstr(win, row, 0, &buff[row * width / 2], width / 2);
-	//}
-    //tb_change_cell(x, 0, 0x28ff, TB_DEFAULT, TB_DEFAULT);
-
     for (int x = 0; x < width / 2; x++)
         for (int y = 0; y < height / 4; y++) {
             uint32_t ch = buff[y * width / 2 + x];
             tb_change_cell(x, y, ch, TB_DEFAULT, TB_DEFAULT);
         }
 }
-//} // extern "C"
 
 #endif
