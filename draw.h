@@ -1,6 +1,7 @@
 #ifndef __DRAW_H__
 #define __DRAW_H__
 
+#include <mutex>
 #include "canvas.h"
 #include "termbox.h"
 
@@ -15,6 +16,7 @@ class Draw {
         uint32_t num_pixel;
         uint8_t *min;
         uint8_t *max;
+        std::mutex mutex;
 };
 
 Draw::Draw(Canvas *canvas, Track *track) {
@@ -29,6 +31,7 @@ Draw::Draw(Canvas *canvas, Track *track) {
 }
 
 void Draw::dodraw(void) {
+    mutex.lock();
     vscale = 1;
     tb_clear();
     canvas->clear();
@@ -44,9 +47,9 @@ void Draw::dodraw(void) {
                 canvas->set(i, _y);
             }
 		}
-		canvas->draw();
-        tb_present();
-    
+	canvas->draw();
+    tb_present();
+    mutex.unlock();
 }
 
 
