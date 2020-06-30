@@ -11,8 +11,6 @@
 #include <locale.h>
 #include "termbox.h"
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 class Canvas {
     public:
@@ -23,7 +21,8 @@ class Canvas {
         void unset(uint16_t x, uint16_t y);
         void draw(void);
         
-        int width, height;
+        uint32_t width, height;
+        uint8_t *min, *max;
         
     private:
 	    uint32_t    *buff;
@@ -69,6 +68,8 @@ void Canvas::draw(void) {
 	//for (int row = 0; row < height / 4; row++) {
 	//	mvwadd_wchnstr(win, row, 0, &buff[row * width / 2], width / 2);
 	//}
+    //tb_change_cell(x, 0, 0x28ff, TB_DEFAULT, TB_DEFAULT);
+
     for (int x = 0; x < width / 2; x++)
         for (int y = 0; y < height / 4; y++) {
             uint32_t ch = buff[y * width / 2 + x];
