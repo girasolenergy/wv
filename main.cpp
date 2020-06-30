@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
 
     FILE *fd;
     if (argc == 1) {
-        endwin();
+        tb_shutdown();
         return 0;
     }
 	fd = fopen(argv[1], "rb");

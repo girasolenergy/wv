@@ -32,7 +32,6 @@ Draw::Draw(Canvas *canvas, Track *track) {
 
 void Draw::dodraw(void) {
     mutex.lock();
-    vscale = 1;
     tb_clear();
     canvas->clear();
     uint32_t num_pixel = track->get_disp_data(start, ppp, canvas->width, min, max);
