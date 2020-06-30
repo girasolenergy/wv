@@ -11,6 +11,7 @@
 #include "block.h"
 #include "track.h"
 #include "limits.h"
+#include "termbox.h"
 
 
 void read_key(WINDOW *win, std::queue<int> &queue) {
@@ -42,10 +43,17 @@ void read_wav(FILE *fd, Track *track, uint32_t buf_len, bool &doread) {
 
 int main(int argc, char **argv) {
     setbuf(stdout, NULL);
-    setlocale(LC_ALL, "");
-    initscr();
-    cbreak();
-    noecho();
+
+    int ret = tb_init();
+    tb_select_input_mode(TB_INPUT_CURRENT);
+    int win_w, win_h;
+    win_w = tb_width();
+    win_h = tb_height();
+    tb_change_cell(0, 0, 0x28ff, TB_DEFAULT, TB_DEFAULT);
+    tb_present();
+    //sleep(2);
+    //tb_shutdown();
+    //return 0;
 
     FILE *fd;
     if (argc == 1) {
@@ -55,20 +63,16 @@ int main(int argc, char **argv) {
 	fd = fopen(argv[1], "rb");
     if (fd == NULL) exit(-1);
 
-    int win_width, win_height;
-    getmaxyx(stdscr, win_height, win_width);
-    WINDOW *win = newwin(win_height, win_width, 0, 0);
-    keypad(win, TRUE);
 
     Track track(65536);
-    int can_width = win_width * 2;
-    int can_height = win_height * 4;
+    int can_width = win_w * 2;
+    int can_height = win_h * 4;
 	Canvas canvas(can_width, can_height);
     uint8_t *min = (uint8_t *)calloc(can_width, sizeof(uint8_t));
     uint8_t *max = (uint8_t *)calloc(can_width, sizeof(uint8_t));
 
     std::queue<int> queue;
-    std::thread th1(read_key, win, std::ref(queue));
+    //std::thread th1(read_key, win, std::ref(queue));
     bool doread = true;
     uint32_t buf_len = 1<<14;    // trade off between effiency and wave update rate
     std::thread th2(read_wav, fd, &track, buf_len, std::ref(doread));
@@ -81,11 +85,11 @@ int main(int argc, char **argv) {
 	while (TRUE) {
         canvas.clear();
 
-        std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+        //std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
         uint32_t view_mid = start + ppp * can_width / 2;
         uint32_t view_len = ppp * can_width;
         num_pixel = track.get_disp_data(start, ppp, can_width, min, max);
-        std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+        //std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 
 		for (int i = 0; i < num_pixel; i++) {
             int _min = (min[i] - 128) * vscale + can_height / 2;
@@ -97,9 +101,62 @@ int main(int argc, char **argv) {
                 canvas.set(i, _y);
             }
 		}
-		canvas.draw(win);
+		canvas.draw();
+        tb_present();
+
 
         int key = -1;
+        struct tb_event ev;
+        int ret = tb_poll_event(&ev);
+
+        if (ret == TB_EVENT_KEY) {
+            uint32_t key = ev.ch;
+            if (key == 'q') {
+                tb_shutdown();
+                return 0;
+            }
+ 
+            uint32_t pan_step = can_width * 0.1;
+            switch (key) {
+                case 'i':
+                    if (ppp / 2 < 1)
+                        break;
+                    // if waveform is less than one screen, the zoom center is not the center of the screen
+                    if (num_pixel >= can_width) 
+                        start += (num_pixel * 0.5 / 2) * ppp;
+                    ppp *= 0.5;
+                    break;
+                case 'o':
+                    if (ppp >= INT_MAX / 2)
+                        break;
+                    ppp *= 2;
+                    start -= (can_width * 0.5 / 2) * ppp;
+                    start = std::max(start, 0);
+                    break;
+                case 'l':   // pan right
+                    if (start > INT_MAX - pan_step * ppp)
+                        break;
+                    start += pan_step * ppp;
+                    break;
+                case 'h':
+                    start -= pan_step * ppp;
+                    start = std::max(start, 0);
+                    break;
+                case 'I':   // zoom vertically
+                    vscale *= 1.2;
+                    break;
+                case 'O':
+                    vscale /= 1.2;
+                    break;
+                case 'p':   // pause
+                    doread = !doread;
+                    break;
+                default:
+                    break;
+            }
+        }
+        continue;
+
         if (!queue.empty()) {
             key = queue.front();
             queue.pop();
@@ -144,15 +201,14 @@ int main(int argc, char **argv) {
             }
         }
 
-        uint64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-        mvwprintw(win, win_height-1, 0, "ppp=%d, wxh=%dx%d, num_pixel=%d, duration=%ldms, data=%.2fMB, start=%u", ppp, can_width, can_height, num_pixel, duration, num_pixel * ppp * 1.0 / (1<<20), start);
-    	wrefresh(win);
+        //uint64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        //mvwprintw(win, win_height-1, 0, "ppp=%d, wxh=%dx%d, num_pixel=%d, duration=%ldms, data=%.2fMB, start=%u", ppp, can_width, can_height, num_pixel, duration, num_pixel * ppp * 1.0 / (1<<20), start);
         
         usleep(20e3); // 20ms
         continue;
     }
 
-    th1.join();
+    //th1.join();
     th2.join();
 
     endwin();

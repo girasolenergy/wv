@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-I.
-LDLIBS=-lm -lncursesw -lpthread
+LDLIBS=-lm -lncursesw -lpthread -ltermbox
 
 all: wv run
 
