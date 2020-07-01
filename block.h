@@ -20,8 +20,6 @@ class Block {
         uint8_t *min;
         uint32_t bin_size;
         uint32_t num_bin;
-
-    private:
 };
 
 #endif
