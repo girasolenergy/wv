@@ -15,7 +15,7 @@ void Draw::dodraw(void) {
     mutex.lock();
     tb_clear();
     canvas->clear();
-    uint32_t num_pixel = track->get_disp_data(start, ppp, canvas->width, min, max);
+    num_pixel = track->get_disp_data(start, ppp, canvas->width, min, max);
     int height = canvas->height;
     for (int i = 0; i < num_pixel; i++) {
             int _min = (min[i] - 128) * vscale + height / 2;
