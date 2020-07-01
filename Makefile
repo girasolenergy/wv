@@ -1,14 +1,19 @@
-CC=g++
-CFLAGS=-I.
-LDLIBS=-lm -lpthread -ltermbox
+CC		:= g++
+CFLAGS	:= -I.
+LDLIBS	:= -lm -lpthread -ltermbox
 
-all: wv run
+SOURCES	:= $(wildcard *.cpp)
+OBJS	:= $(patsubst %.cpp, %.o, $(SOURCES))
+TARGET	:= wv
 
-wv: main.cpp block.h track.h draw.h
-	$(CC) -o wv main.cpp -I. $(LDLIBS)
+all: $(TARGET)
 
-run: wv
-	./wv ddd.raw
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDLIBS)
+
+run: $(TARGET)
+	./$(TARGET) ddd.raw
 
 clean:
-	rm wv
+	rm $(TARGET)
+	rm *.o

@@ -2,19 +2,19 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
-#include <canvas.h>
 #include <chrono>
 #include <queue>
 #include <thread>
+#include <limits.h>
+#include "canvas.h"
 #include "block.h"
 #include "track.h"
-#include "limits.h"
 #include "termbox.h"
 #include "draw.h"
 
 
 void read_wav(Draw *draw, FILE *fd, Track *track, uint32_t buf_len, bool &doread) {
-    while (1) {
+    while (true) {
         uint8_t *buf = (uint8_t *)calloc(buf_len, sizeof(uint8_t));
         int ret = fread(buf, 1, buf_len, fd);
         if (ret == 0)
@@ -88,7 +88,6 @@ void handle_event(Draw *draw, bool &doread) {
 
 int main(int argc, char **argv) {
     setbuf(stdout, NULL);
-
     int ret = tb_init();
     tb_select_input_mode(TB_INPUT_CURRENT);
     int win_w, win_h;
