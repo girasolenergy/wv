@@ -109,7 +109,6 @@ uint32_t Track::get_disp_data(uint32_t start_sample_idx, uint32_t sample_per_pix
     for (x = 0; x < num_pixel; x++) {
         if (blk_idx >= blocks.size())
             break;
-        
         get_range_minmax(blk_idx, blk_sample_idx, sample_per_pixel, min[x], max[x]);
         
     }

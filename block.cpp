@@ -39,5 +39,3 @@ void Block::update_minmax(void) {
         max[i] = _max;
     }
 }
-
-

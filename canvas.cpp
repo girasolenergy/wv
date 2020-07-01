@@ -35,5 +35,3 @@ void Canvas::draw(void) {
             tb_change_cell(x, y, ch, TB_DEFAULT, TB_DEFAULT);
         }
 }
-
-

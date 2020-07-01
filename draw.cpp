@@ -31,4 +31,3 @@ void Draw::dodraw(void) {
     tb_present();
     mutex.unlock();
 }
-
