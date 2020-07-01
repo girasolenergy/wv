@@ -17,12 +17,13 @@ void read_wav(FILE *fd, Draw *draw, Track *track, uint32_t buf_len, bool &doread
     while (true) {
         uint8_t *buf = (uint8_t *)calloc(buf_len, sizeof(uint8_t));
         int ret = fread(buf, 1, buf_len, fd);
-        if (ret == 0)
-            break;
         if (doread) {
-            Block *block = new Block(buf, buf_len);
+            Block *block = new Block(buf, ret);
             track->append_block(block);
             draw->dodraw();
+        }
+        if (ret < buf_len) {
+            break;
         }
     }
     
@@ -108,7 +109,7 @@ int main(int argc, char **argv) {
     Draw draw(&canvas, &track);
 
     bool doread = true;
-    uint32_t buf_len = 1<<14;    // trade off between effiency and wave update rate
+    uint32_t buf_len = 1<<17;    // trade off between effiency and wave update rate
     std::thread th1(read_wav, fd, &draw, &track, buf_len, std::ref(doread));
     std::thread th2(handle_event, &draw, std::ref(doread));
     
