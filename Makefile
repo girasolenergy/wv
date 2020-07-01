@@ -1,5 +1,5 @@
 CC		:= g++
-CFLAGS	:= -I.
+CFLAGS	:= -I. -g -std=c++11
 LDLIBS	:= -lm -lpthread -ltermbox
 
 SOURCES	:= $(wildcard *.cpp)

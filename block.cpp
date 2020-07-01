@@ -27,15 +27,20 @@ Block::~Block(void) {
 
 void Block::update_minmax(void) {
     uint8_t *p = buff;
+    uint8_t *p_tail = buff + len;
     for (uint32_t i = 0; i < num_bin; i++) {
         uint8_t _min = 255;
         uint8_t _max = 0;
         for (uint32_t j = 0; j < bin_size; j++) {
+            if (p >= p_tail)
+                break;
             _min = std::min(_min, *p);
             _max = std::max(_max, *p);
             p++;
         }
         min[i] = _min;
         max[i] = _max;
+        if (p >= p_tail)
+            break;
     }
 }
