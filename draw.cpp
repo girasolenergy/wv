@@ -8,7 +8,7 @@ Draw::Draw(Canvas *canvas, Track *track) {
     vscale = 1;
     num_pixel = 0;
     min = (uint8_t *)calloc(canvas->width, sizeof(uint8_t));
-    max = (uint8_t *)calloc(canvas->height, sizeof(uint8_t));
+    max = (uint8_t *)calloc(canvas->width, sizeof(uint8_t));
 }
 
 void Draw::dodraw(void) {
