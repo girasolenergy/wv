@@ -4,7 +4,7 @@
 #include <mutex>
 #include "canvas.h"
 #include "track.h"
-#include "termbox.h"
+#include "termbox/termbox.h"
 
 class Draw {
     public:

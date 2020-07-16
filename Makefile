@@ -1,8 +1,9 @@
 CC		:= g++
 CFLAGS	:= -I. -g -std=c++11
-LDLIBS	:= -lm -lpthread -ltermbox
+CXXFLAGS = -fpermissive
+LDLIBS	:= -lm -lpthread
 
-SOURCES	:= $(wildcard *.cpp)
+SOURCES	:= $(wildcard *.cpp) $(wildcard termbox/*.c) 
 OBJS	:= $(patsubst %.cpp, %.o, $(SOURCES))
 HEADERS := $(patsubst %.cpp, %.h, $(SOURCES))
 TARGET	:= wv
@@ -10,11 +11,11 @@ TARGET	:= wv
 all: $(TARGET)
 
 $(TARGET): $(OBJS) $(HEADERS)
-	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDLIBS)
+	$(CC) $(CFLAGS) $(CXXFLAGS) -o $@ $(OBJS) $(LDLIBS)
 
 run: $(TARGET)
 	./$(TARGET) ddd.raw
 
 clean:
-	rm $(TARGET)
 	rm *.o
+	rm $(TARGET)

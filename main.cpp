@@ -9,7 +9,7 @@
 #include "canvas.h"
 #include "block.h"
 #include "track.h"
-#include "termbox.h"
+#include "termbox/termbox.h"
 #include "draw.h"
 
 

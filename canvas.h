@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
-#include "termbox.h"
+#include "termbox/termbox.h"
 
 
 class Canvas {
