@@ -30,8 +30,6 @@ void read_wav(FILE *fd, Draw *draw, Track *track, uint32_t buf_len, bool &doread
 }
 
 void handle_event(Draw *draw, bool &doread) {
-    Canvas *canvas = draw->canvas;
-    Track *track = draw->track;
     while (true) {
         struct tb_event ev;
         int ret = tb_poll_event(&ev);
@@ -43,37 +41,24 @@ void handle_event(Draw *draw, bool &doread) {
                 exit(0);
             }
  
-            uint32_t pan_step = canvas->width * 0.1;
             switch (key) {
                 case 'i':
-                    if (draw->ppp / 2 < 1)
-                        break;
-                    // if waveform is less than one screen, the zoom center is not the center of the screen
-                    if (draw->num_pixel >= canvas->width) 
-                        draw->start += (draw->num_pixel * 0.5 / 2) * draw->ppp;
-                    draw->ppp *= 0.5;
+                    draw->zoomx(1);
                     break;
                 case 'o':
-                    if (draw->ppp >= INT_MAX / 2)
-                        break;
-                    draw->ppp *= 2;
-                    draw->start -= (canvas->width * 0.5 / 2) * draw->ppp;
-                    draw->start = std::max(draw->start, (uint32_t)0);
+                    draw->zoomx(-1);
                     break;
                 case 'l':   // pan right
-                    if (draw->start > INT_MAX - pan_step * draw->ppp)
-                        break;
-                    draw->start += pan_step * draw->ppp;
+                    draw->pan(1);
                     break;
                 case 'h':
-                    draw->start -= pan_step * draw->ppp;
-                    draw->start = std::max(draw->start, (uint32_t)0);
+                    draw->pan(-1);
                     break;
                 case 'I':   // zoom vertically
-                    draw->vscale *= 1.2;
+                    draw->zoomy(1);
                     break;
                 case 'O':
-                    draw->vscale /= 1.2;
+                    draw->zoomy(-1);
                     break;
                 case 'p':   // pause
                     doread = !doread;

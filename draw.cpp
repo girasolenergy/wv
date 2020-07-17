@@ -1,4 +1,5 @@
 #include "draw.h"
+#include <limits.h>
 
 Draw::Draw(Canvas *canvas, Track *track) {
     this->canvas = canvas;
@@ -7,6 +8,7 @@ Draw::Draw(Canvas *canvas, Track *track) {
     ppp = 4096*8;
     vscale = 1;
     num_pixel = 0;
+    pan_step = canvas->width * 0.1;
     min = (uint8_t *)calloc(canvas->width, sizeof(uint8_t));
     max = (uint8_t *)calloc(canvas->width, sizeof(uint8_t));
 }
@@ -30,4 +32,39 @@ void Draw::dodraw(void) {
 	canvas->draw();
     tb_present();
     mutex.unlock();
+}
+
+void Draw::pan(int direction) {
+    if (direction == 1) {
+        if (this->start > INT_MAX - this->pan_step * this->ppp)
+            return;
+        this->start += this->pan_step * this->ppp;
+    } else if (direction == -1) {
+        this->start -= this->pan_step * this->ppp;
+        this->start = std::max(this->start, (uint32_t)0);
+    }
+}
+
+void Draw::zoomx(int direction) {
+    if (direction == 1) {   // zoom in
+        if (ppp / 2 < 1)
+            return;
+        if (this->num_pixel >= this->canvas->width)
+            this->start += (this->num_pixel * 0.5 /2) * this->ppp;
+        this->ppp *= 0.5;
+    } else if (direction == -1) {   // zoom out
+        if (ppp >= INT_MAX / 2)
+            return;
+        ppp *= 2;
+        start -= (canvas->width * 0.5 / 2) * ppp;
+        start = std::max(start, (uint32_t)0);
+    }
+}
+
+
+void Draw::zoomy(int direction) {
+    if (direction == 1)
+        vscale *= 1.2;
+    else if (direction == -1)
+        vscale /= 1.2;
 }
