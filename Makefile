@@ -14,7 +14,7 @@ $(TARGET): $(OBJS) $(HEADERS)
 	$(CC) $(CFLAGS) $(CXXFLAGS) -o $@ $(OBJS) $(LDLIBS)
 
 run: $(TARGET)
-	./$(TARGET) ddd.raw
+	#./$(TARGET) data.raw
 
 clean:
 	rm *.o
