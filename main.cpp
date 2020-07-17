@@ -28,7 +28,7 @@ void read_wav(FILE *fd, Draw *draw, Track *track, uint32_t buf_len, bool &doread
     }
 }
 
-void handle_event(Draw *draw, bool &doread) {
+void read_key(Draw *draw, bool &doread) {
     while (true) {
         struct tb_event ev;
         int ret = tb_poll_event(&ev);
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
     bool doread = true;
     uint32_t buf_len = 1<<17;    // trade off between effiency and wave update rate
     std::thread th1(read_wav, fd, &draw, &track, buf_len, std::ref(doread));
-    std::thread th2(handle_event, &draw, std::ref(doread));
+    std::thread th2(read_key, &draw, std::ref(doread));
     
 	while (true) {
         sleep(1);
