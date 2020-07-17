@@ -26,22 +26,20 @@ void read_wav(FILE *fd, Draw *draw, Track *track, uint32_t buf_len, bool &doread
             break;
         }
     }
-    
 }
 
 void handle_event(Draw *draw, bool &doread) {
     while (true) {
         struct tb_event ev;
         int ret = tb_poll_event(&ev);
-
         if (ret == TB_EVENT_KEY) {
             uint32_t key = ev.ch;
-            if (key == 'q') {
-                tb_shutdown();
-                exit(0);
-            }
  
             switch (key) {
+                case 'q':
+                    tb_shutdown();
+                    exit(0);
+                    break;
                 case 'i':
                     draw->zoomx(1);
                     break;
@@ -74,7 +72,8 @@ void handle_event(Draw *draw, bool &doread) {
 
 int main(int argc, char **argv) {
     setbuf(stdout, NULL);
-    int ret = tb_init();
+
+    tb_init();
     tb_select_input_mode(TB_INPUT_CURRENT);
     int win_w, win_h;
     win_w = tb_width();
@@ -88,9 +87,7 @@ int main(int argc, char **argv) {
     if (fd == NULL) exit(-1);
 
     Track track(65536);
-    int can_width = win_w * 2;
-    int can_height = win_h * 4;
-	Canvas canvas(can_width, can_height);
+	Canvas canvas(win_w * 2, win_h * 4);
     Draw draw(&canvas, &track);
 
     bool doread = true;
