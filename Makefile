@@ -1,6 +1,6 @@
 CC		:= g++
 CFLAGS	:= -I. -g -std=c++11
-CXXFLAGS = -fpermissive
+CXXFLAGS:= -fpermissive
 LDLIBS	:= -lm -lpthread
 
 SOURCES	:= $(wildcard *.cpp) $(wildcard termbox/*.c) 
