@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
     Draw draw(&canvas, &track);
 
     bool doread = true;
-    uint32_t buf_len = 1<<17;    // trade off between effiency and wave update rate
+    uint32_t buf_len = 1<<14;    // trade off between effiency and wave update rate
     std::thread th1(read_wav, fd, &draw, &track, buf_len, std::ref(doread));
     std::thread th2(read_key, &draw, std::ref(doread));
     
