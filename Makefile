@@ -16,6 +16,9 @@ $(TARGET): $(OBJS) $(HEADERS)
 run: $(TARGET)
 	#./$(TARGET) data.raw
 
+install:
+	cp $(TARGET) /usr/local/sbin/
+
 clean:
 	rm *.o
 	rm $(TARGET)
