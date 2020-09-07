@@ -1,5 +1,5 @@
-# wv
-wv is a wave viewing program that can view a single channel byte (unsigned char) file.
+# wave-viewer
+wave-viewer is a wave viewing program that can view a single channel byte (unsigned char) file.
 
 ### Installation
 ```sh
