@@ -15,8 +15,14 @@
 
 void read_wav(FILE *fd, Draw *draw, Track *track, uint32_t buf_len, bool &doread) {
     while (true) {
-        uint8_t *buf = (uint8_t *)calloc(buf_len, sizeof(uint8_t));
-        int ret = fread(buf, 1, buf_len, fd);
+        int16_t *tmp = (int16_t *)calloc(buf_len, sizeof(int16_t));
+        int ret = fread(tmp, 2, buf_len, fd);
+        uint8_t *buf = (uint8_t *)tmp;
+        for (int i = 0; i < buf_len; i++) {
+            int8_t ch = ((tmp[i] / 256) & 0xff);
+            buf[i] = ch + 128;
+        }
+
         if (doread) {
             Block *block = new Block(buf, ret);
             track->append_block(block);
