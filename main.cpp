@@ -11,16 +11,24 @@
 #include "track.h"
 #include "termbox/termbox.h"
 #include "draw.h"
+#include "argparse.hpp"
 
 
-void read_wav(FILE *fd, Draw *draw, Track *track, uint32_t buf_len, bool &doread) {
+void read_wav(FILE *fd, Draw *draw, Track *track, uint32_t buf_len, bool &doread, int bit) {
     while (true) {
-        int16_t *tmp = (int16_t *)calloc(buf_len, sizeof(int16_t));
-        int ret = fread(tmp, 2, buf_len, fd);
-        uint8_t *buf = (uint8_t *)tmp;
-        for (int i = 0; i < buf_len; i++) {
-            int8_t ch = ((tmp[i] / 256) & 0xff);
-            buf[i] = ch + 128;
+        uint8_t *buf;
+        int ret;
+        if (bit == 16) {
+            int16_t *tmp = (int16_t *)calloc(buf_len, sizeof(int16_t));
+            ret = fread(tmp, 2, buf_len, fd);
+            buf = (uint8_t *)tmp;
+            for (int i = 0; i < buf_len; i++) {
+                int8_t ch = ((tmp[i] / 256) & 0xff);
+                buf[i] = ch + 128;
+            }
+        } else if (bit == 8) {
+            buf = (uint8_t *)calloc(buf_len, sizeof(uint8_t));
+            ret = fread(buf, 1, buf_len, fd);
         }
 
         if (doread) {
@@ -78,6 +86,17 @@ void read_key(Draw *draw, bool &doread) {
 
 int main(int argc, char **argv) {
     setbuf(stdout, NULL);
+    argparse::ArgumentParser arg("wave view");
+    arg.add_argument("-b", "--bit")
+        .default_value(16)
+        .action([](const std::string& value) {return std::stoi(value); })
+        .help("set data as 8 bit or 16 bit");
+    arg.add_argument("fname")
+        .required()
+        .help("file name");
+    arg.parse_args(argc, argv);
+    std::string fname = arg.get<std::string>("fname");
+    int bit = arg.get<int>("--bit");
 
     tb_init();
     tb_select_input_mode(TB_INPUT_CURRENT);
@@ -89,7 +108,7 @@ int main(int argc, char **argv) {
         tb_shutdown();
         return 0;
     }
-	FILE *fd = fopen(argv[1], "rb");
+	FILE *fd = fopen((char *)fname.c_str(), "rb");
     if (fd == NULL) exit(-1);
 
     Track track(65536);
@@ -98,7 +117,7 @@ int main(int argc, char **argv) {
 
     bool doread = true;
     uint32_t buf_len = 1<<14;    // trade off between effiency and wave update rate
-    std::thread th1(read_wav, fd, &draw, &track, buf_len, std::ref(doread));
+    std::thread th1(read_wav, fd, &draw, &track, buf_len, std::ref(doread), bit);
     std::thread th2(read_key, &draw, std::ref(doread));
     
 	while (true) {

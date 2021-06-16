@@ -1,7 +1,7 @@
 CC		:= g++
-CFLAGS	:= -I. -g -std=c++11
-CXXFLAGS:= -fpermissive
-LDLIBS	:= -lm -lpthread
+CFLAGS	:= -I. -g
+CXXFLAGS:= -fpermissive -std=c++17
+LDLIBS	:= -lm -lpthread -lstdc++fs
 
 SOURCES	:= $(wildcard *.cpp) $(wildcard termbox/*.c) 
 OBJS	:= $(patsubst %.cpp, %.o, $(SOURCES))
