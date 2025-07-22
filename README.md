@@ -12,6 +12,7 @@ The usage is very straight forward. Use the file name as input to **`wv`**.
 ```sh
 $ wv filename
 ```
+You can also pass `-` instead of `filename` to read data from standard input.
 **`filename`** can be a normal sized file, or a streaming file that never ends.
 In the latter case, **`wv`** will show the data lively. Note that if you leave **`wv`** plotting stream data, it will continueously consume memory, until no memory is available and killed by linux kernel.
 
