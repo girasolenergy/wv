@@ -1,25 +1,41 @@
 # wave-viewer
-wave-viewer is a wave viewing program that can view a single channel byte (unsigned char) file.
 
-### Installation
+`wave-viewer` is a small terminal program that displays raw waveform data. It reads unsigned byte or 16‑bit samples from a file or standard input and provides simple interactive controls to inspect the data.
+
+## Build
+
+Use the bundled `Makefile`.
+
 ```sh
 $ make
-$ sudo make install
+$ sudo make install  # optional
 ```
 
-### Usage
-The usage is very straight forward. Use the file name as input to **`wv`**.
+## Usage
+
 ```sh
 $ wv filename
 ```
-You can also pass `-` instead of `filename` to read data from standard input.
-**`filename`** can be a normal sized file, or a streaming file that never ends.
-In the latter case, **`wv`** will show the data lively. Note that if you leave **`wv`** plotting stream data, it will continueously consume memory, until no memory is available and killed by linux kernel.
 
-**`wv`** uses interactive mode like **`vim`**. Here are some command you can use:
+Passing `-` instead of a file name makes the program read from standard input. When fed with an endless stream the application will keep allocating memory for buffered data until it is terminated.
 
-* h, l, pan waveform left or right
-* i, o, zoom in or out in x axis (time)
-* I, O, zoom in or out in y axis (amplitude)
-* p, pause
-* q, quit
+### Controls
+
+* `h`, `l` – pan waveform left or right
+* `i`, `o` – zoom in/out on the time axis
+* `I`, `O` – zoom in/out on the amplitude axis
+* `p` – pause rendering
+* `q` – quit
+
+## Third‑party code
+
+The following source files were copied from other open‑source projects and remain under their respective MIT licenses:
+
+* `argparse.hpp` &ndash; from [p-ranav/argparse](https://github.com/p-ranav/argparse).
+* The `termbox/` directory &ndash; from [nsf/termbox](https://github.com/nsf/termbox).
+
+Refer to the comments in each file for details.
+
+## License
+
+This project is distributed under the MIT License. See [LICENSE.md](LICENSE.md) for the full license text.
