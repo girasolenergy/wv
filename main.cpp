@@ -94,20 +94,32 @@ int main(int argc, char **argv) {
     arg.add_argument("fname")
         .required()
         .help("file name");
-    arg.parse_args(argc, argv);
+
+    if (argc == 1) {
+        std::cout << arg;
+        return 0;
+    }
+
+    try {
+        arg.parse_args(argc, argv);
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        std::cout << arg;
+        return 1;
+    }
+
     std::string fname = arg.get<std::string>("fname");
     int bit = arg.get<int>("--bit");
 
+    if (bit != 8 && bit != 16) {
+        std::cerr << "Invalid bit depth: " << bit << ". Use 8 or 16." << std::endl;
+        return 1;
+    }
+
     tb_init();
     tb_select_input_mode(TB_INPUT_CURRENT);
-    int win_w, win_h;
-    win_w = tb_width();
-    win_h = tb_height();
-
-    if (argc == 1) {
-        tb_shutdown();
-        return 0;
-    }
+    int win_w = tb_width();
+    int win_h = tb_height();
     FILE *fd;
     if (fname == "-") {
         fd = stdin;
