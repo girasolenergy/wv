@@ -108,7 +108,12 @@ int main(int argc, char **argv) {
         tb_shutdown();
         return 0;
     }
-	FILE *fd = fopen((char *)fname.c_str(), "rb");
+    FILE *fd;
+    if (fname == "-") {
+        fd = stdin;
+    } else {
+        fd = fopen((char *)fname.c_str(), "rb");
+    }
     if (fd == NULL) exit(-1);
 
     Track track(65536);
