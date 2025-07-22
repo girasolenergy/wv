@@ -1,6 +1,6 @@
-# wave-viewer
+# wv(wave-viewer)
 
-`wave-viewer` is a small terminal program that displays raw waveform data. It reads unsigned byte or 16‑bit samples from a file or standard input and provides simple interactive controls to inspect the data.
+`wv(wave-viewer)` is a small terminal program that displays raw waveform data. It reads unsigned byte or 16‑bit samples from a file or standard input and provides simple interactive controls to inspect the data.
 
 ## Build
 
